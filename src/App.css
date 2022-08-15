@@ -37,6 +37,11 @@ body {
   font-family: inherit;
   font-weight: 500;
   margin-top: 16px;
+  cursor: pointer;
+}
+.button[disabled] {
+  opacity: 0.5;
+  cursor: default;
 }
 
 .blob-bottom,
@@ -90,11 +95,14 @@ body {
   left: 0;
   margin: 0;
 }
-.radio-item input[type='radio'].wrongAnswer {
-  background: red;
+.radio-item input[type='radio'].wrongAnswer + label {
+  background: #f8bcbc;
+  border: none;
 }
-.radio-item input[type='radio'].correctAnswer {
-  background: green;
+.radio-item input[type='radio'].correctAnswer + label {
+  background: #94d7a2;
+  opacity: 1;
+  border: none;
 }
 
 .radio-wrapper label {
@@ -108,7 +116,7 @@ body {
   display: block;
 }
 
-.radio-item:hover > label {
+.radio-item:hover :not(input[disabled]) + label {
   background-color: #d6dbf5;
 }
 
@@ -116,3 +124,10 @@ body {
   border: 1px solid #d6dbf5;
   background-color: #d6dbf5;
 }
+
+.radio-item input[disabled] + label {
+  opacity: 0.5;
+}
+/* .radio-item:hover input[disabled] + label {
+  background-color: unset;
+} */

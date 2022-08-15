@@ -4,38 +4,44 @@ import he from 'he';
 import Question from './question';
 
 export default function questionScreen() {
-  const [selectedAnswers, setSelectedAnswers] = useState({});
   const [questions, setQuestions] = useState([]);
   const [isAnswersChecked, setIsAnswersChecked] = useState(false);
+  const [countCorrect, setCountCorrect] = useState(0);
 
   function handleChange(event) {
     const { name, value } = event.target;
-    setSelectedAnswers(prevState => {
-      return {
-        ...prevState,
-        [name]: value,
-      };
-    });
+    setQuestions(prevState =>
+      prevState.map(question =>
+        question.id === name ? { ...question, selectedAnswer: value } : question
+      )
+    );
   }
 
-  function checkAnswers() {
+  function handleCheckAnswersButton() {
     setIsAnswersChecked(true);
+    //determine number of correct answers
   }
 
-  function answerClass(questionId, answer) {
-    let isCorrectAnswer;
-    const isSelected = selectedAnswers[questionId] === answer;
+  function checkAnswer(questionId, answer) {
+    let isCorrect;
     questions.forEach(question => {
       if (question.id === questionId) {
         if (question.correct_answer === answer) {
-          console.log(answer, 'correct answer!');
-          isCorrectAnswer = true;
+          isCorrect = true;
         } else {
-          console.log(answer, 'wrong answer!');
-          isCorrectAnswer = false;
+          isCorrect = false;
         }
       }
     });
+
+    return isCorrect;
+  }
+
+  function answerClass(questionId, answer) {
+    const isCorrectAnswer = checkAnswer(questionId, answer);
+    const isSelected = questions.find(
+      question => question.id === questionId && question.selectedAnswer === answer
+    );
     if (isCorrectAnswer) {
       return 'correctAnswer';
     }
@@ -44,51 +50,67 @@ export default function questionScreen() {
     }
     return;
   }
+  function shuffleAnswers(answers) {
+    const shuffledAnswers = answers
+      .map(value => ({ value, sort: Math.random() }))
+      .sort((a, b) => a.sort - b.sort)
+      .map(({ value }) => value);
+    return shuffledAnswers;
+  }
   useEffect(() => {
-    fetch('https://opentdb.com/api.php?amount=5&type=multiple')
+    fetch('https://opentdb.com/api.php?amount=5&difficulty=easy&type=multiple')
       .then(res => res.json())
       .then(data => {
-        console.log(data);
-        //add id
-        data.results.forEach(result => (result.id = nanoid()));
-        //create all_answers, correct_answer and incorrect_answers together in random orders
-        data.results.forEach(result => {
-          const allAnswers = [...result.incorrect_answers, result.correct_answer];
-
-          const shuffledAnswers = allAnswers
-            .map(value => ({ value, sort: Math.random() }))
-            .sort((a, b) => a.sort - b.sort)
-            .map(({ value }) => value);
-          return (result.all_answers = shuffledAnswers);
-        });
-        setQuestions(data.results);
+        setQuestions(
+          data.results.map(question => {
+            return {
+              ...question,
+              id: nanoid(),
+              allAnswers: shuffleAnswers([...question.incorrect_answers, question.correct_answer]),
+              selectedAnswer: '',
+            };
+          })
+        );
       });
   }, []);
-  console.log(questions);
+
   return (
     <div className='question-screen'>
       {questions.map(question => (
         <fieldset className='radio-wrapper' key={question.id}>
           <legend className='question'>{he.decode(question.question)}</legend>
-          {question.all_answers.map((answer, index) => (
+          {question.allAnswers.map((answer, index) => (
             <span className='radio-item' key={`${question.id}${index}`}>
               <input
                 id={question.id}
                 type='radio'
                 value={answer}
                 name={question.id}
-                checked={selectedAnswers[question.id] === answer}
+                checked={question.selectedAnswer === answer}
                 className={isAnswersChecked ? answerClass(question.id, answer) : undefined}
                 onChange={handleChange}
+                disabled={isAnswersChecked}
               />
               <label htmlFor={question.id}>{he.decode(answer)}</label>
             </span>
           ))}
         </fieldset>
       ))}
-      <button className='button' onClick={checkAnswers}>
-        Check Answers
-      </button>
+      {!isAnswersChecked ? (
+        <button
+          className='button'
+          onClick={handleCheckAnswersButton}
+          disabled={!questions.every(question => question.selectedAnswer)}>
+          Check Answers
+        </button>
+      ) : (
+        <>
+          <p>You scored 3/5 correct answers</p>
+          <button className='button' onClick={handleCheckAnswersButton}>
+            Play Again
+          </button>
+        </>
+      )}
     </div>
   );
 }
