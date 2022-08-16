@@ -20,6 +20,13 @@ export default function questionScreen() {
   function handleCheckAnswersButton() {
     setIsAnswersChecked(true);
     //determine number of correct answers
+    let count = 0;
+    questions.forEach(question => {
+      if (question.selectedAnswer === question.correct_answer) {
+        count = count + 1;
+      }
+    });
+    setCountCorrect(count);
   }
 
   function checkAnswer(questionId, answer) {
@@ -57,8 +64,14 @@ export default function questionScreen() {
       .map(({ value }) => value);
     return shuffledAnswers;
   }
-  useEffect(() => {
-    fetch('https://opentdb.com/api.php?amount=5&difficulty=easy&type=multiple')
+  function resetGame() {
+    setIsAnswersChecked(false);
+    fetchData();
+    setCountCorrect(0);
+  }
+
+  function fetchData() {
+    fetch('https://opentdb.com/api.php?amount=5&category=9&difficulty=easy&type=multiple')
       .then(res => res.json())
       .then(data => {
         setQuestions(
@@ -72,6 +85,9 @@ export default function questionScreen() {
           })
         );
       });
+  }
+  useEffect(() => {
+    fetchData();
   }, []);
 
   return (
@@ -105,8 +121,8 @@ export default function questionScreen() {
         </button>
       ) : (
         <>
-          <p>You scored 3/5 correct answers</p>
-          <button className='button' onClick={handleCheckAnswersButton}>
+          <p>You scored {countCorrect}/5 correct answers</p>
+          <button className='button' onClick={resetGame}>
             Play Again
           </button>
         </>
