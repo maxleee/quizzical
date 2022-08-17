@@ -1,22 +1,16 @@
 import AnswerRadio from './answerRadio';
+import he from 'he';
 
-export default function Question({ handleChange, answers, question }) {
-  const allAnswers = [...question.incorrect_answers, question.correct_answer];
-
-  const shuffledAnswers = allAnswers
-    .map(value => ({ value, sort: Math.random() }))
-    .sort((a, b) => a.sort - b.sort)
-    .map(({ value }) => value);
-  console.log(shuffledAnswers);
+export default function Question({ handleChange, question, isAnswersChecked }) {
   return (
-    <fieldset className='radio-wrapper'>
-      <legend className='question'>{question.question}</legend>
-      {shuffledAnswers.map(answer => (
+    <fieldset className='radio-wrapper' key={question.id}>
+      <legend className='question'>{he.decode(question.question)}</legend>
+      {question.allAnswers.map(answer => (
         <AnswerRadio
-          handleChange={handleChange}
-          answers={answers}
           answer={answer}
           question={question}
+          handleChange={handleChange}
+          isAnswersChecked={isAnswersChecked}
         />
       ))}
     </fieldset>

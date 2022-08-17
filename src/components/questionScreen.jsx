@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { nanoid } from 'nanoid';
-import he from 'he';
+
 import Question from './question';
 
 export default function questionScreen() {
@@ -29,34 +29,6 @@ export default function questionScreen() {
     setCountCorrect(count);
   }
 
-  function checkAnswer(questionId, answer) {
-    let isCorrect;
-    questions.forEach(question => {
-      if (question.id === questionId) {
-        if (question.correct_answer === answer) {
-          isCorrect = true;
-        } else {
-          isCorrect = false;
-        }
-      }
-    });
-
-    return isCorrect;
-  }
-
-  function answerClass(questionId, answer) {
-    const isCorrectAnswer = checkAnswer(questionId, answer);
-    const isSelected = questions.find(
-      question => question.id === questionId && question.selectedAnswer === answer
-    );
-    if (isCorrectAnswer) {
-      return 'correctAnswer';
-    }
-    if (isSelected && isCorrectAnswer === false) {
-      return 'wrongAnswer';
-    }
-    return;
-  }
   function shuffleAnswers(answers) {
     const shuffledAnswers = answers
       .map(value => ({ value, sort: Math.random() }))
@@ -93,24 +65,11 @@ export default function questionScreen() {
   return (
     <div className='question-screen'>
       {questions.map(question => (
-        <fieldset className='radio-wrapper' key={question.id}>
-          <legend className='question'>{he.decode(question.question)}</legend>
-          {question.allAnswers.map((answer, index) => (
-            <span className='radio-item' key={`${question.id}${index}`}>
-              <input
-                id={question.id}
-                type='radio'
-                value={answer}
-                name={question.id}
-                checked={question.selectedAnswer === answer}
-                className={isAnswersChecked ? answerClass(question.id, answer) : undefined}
-                onChange={handleChange}
-                disabled={isAnswersChecked}
-              />
-              <label htmlFor={question.id}>{he.decode(answer)}</label>
-            </span>
-          ))}
-        </fieldset>
+        <Question
+          question={question}
+          handleChange={handleChange}
+          isAnswersChecked={isAnswersChecked}
+        />
       ))}
       {!isAnswersChecked ? (
         <button

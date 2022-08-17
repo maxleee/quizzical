@@ -1,15 +1,29 @@
-export default function AnswerRadio({ handleChange, answers, answer, question, index }) {
+import he from 'he';
+
+export default function AnswerRadio({ handleChange, question, answer, isAnswersChecked }) {
+  function answerClass() {
+    const isCorrectAnswer = question.correct_answer === answer;
+    const isSelected = question.selectedAnswer === answer;
+    if (isCorrectAnswer) {
+      return 'correctAnswer';
+    } else if (isSelected && isCorrectAnswer === false) {
+      return 'wrongAnswer';
+    } else return;
+  }
+
   return (
-    <span className='radio-item'>
+    <span className='radio-item' key={answer}>
       <input
-        id={question}
+        id={question.id}
         type='radio'
         value={answer}
-        name={question.question}
-        checked={answers[index] === answer}
+        name={question.id}
+        checked={question.selectedAnswer === answer}
+        className={isAnswersChecked ? answerClass() : undefined}
         onChange={handleChange}
+        disabled={isAnswersChecked}
       />
-      <label htmlFor='answer-1'>{answer}</label>
+      <label htmlFor={question.id}>{he.decode(answer)}</label>
     </span>
   );
 }
