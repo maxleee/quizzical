@@ -80,7 +80,9 @@ export default function questionScreen() {
         </button>
       ) : (
         <>
-          <p>You scored {countCorrect}/5 correct answers</p>
+          <p>
+            You scored {countCorrect}/{questions.length} correct answers
+          </p>
           <button className='button' onClick={resetGame}>
             Play Again
           </button>
